@@ -1,120 +1,109 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+
+import MainLayout from './layout/MainLayout.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import Categories from './pages/Categories.jsx'
+import ItemMovements from './pages/ItemMovements.jsx'
+import Inventory from './pages/Inventory.jsx'
+import Login from './pages/Login.jsx'
+import Reports from './pages/Reports.jsx'
+
+const inventoryPages = {
+  meteriel: 'meteriel',
+  ferronnerie: 'ferronnerie',
+  peinture: 'peinture',
+  electrique: 'electrique',
+  achat: 'achat',
+  produit: 'produit',
+  signalisation: 'signalisation',
+  'petit-materiel': 'petit-materiel',
+  technique: 'technique',
+}
+
+const pageTitles = {
+  dashboard: 'Tableau de bord',
+  meteriel: 'Matériel',
+  ferronnerie: 'Ferronnerie',
+  peinture: 'Peinture',
+  electrique: 'Électrique',
+  achat: 'Achats',
+  produit: 'Produits',
+  signalisation: 'Signalisation',
+  'petit-materiel': 'Petit matériel',
+  technique: 'Technique',
+  categories: 'Catégories',
+  reports: 'Rapports',
+  'item-movements': 'Sorties du produit',
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null)
+  const [activePage, setActivePage] = useState('dashboard')
+  const [selectedItemId, setSelectedItemId] = useState(null)
+  const [returnPage, setReturnPage] = useState('meteriel')
+
+  function handleLoginSuccess(authenticatedUser) {
+    setUser(authenticatedUser)
+    setActivePage('dashboard')
+  }
+
+  function handleLogout() {
+    setUser(null)
+    setActivePage('dashboard')
+    setSelectedItemId(null)
+  }
+
+  function handleOpenItemMovements(itemId, pageId = activePage) {
+    setSelectedItemId(itemId)
+    setReturnPage(pageId)
+    setActivePage('item-movements')
+  }
+
+  function renderCurrentPage() {
+    if (inventoryPages[activePage]) {
+      return (
+        <Inventory
+          key={activePage}
+          sectionType={inventoryPages[activePage]}
+          onOpenItemMovements={(itemId) => handleOpenItemMovements(itemId, activePage)}
+        />
+      )
+    }
+
+    if (activePage === 'categories') {
+      return <Categories />
+    }
+
+    if (activePage === 'reports') {
+      return <Reports />
+    }
+
+    if (activePage === 'item-movements' && selectedItemId !== null) {
+      return (
+        <ItemMovements
+          itemId={selectedItemId}
+          onBack={() => setActivePage(returnPage)}
+        />
+      )
+    }
+
+    return <Dashboard user={user} onOpenItemMovements={handleOpenItemMovements} />
+  }
+
+  if (!user) {
+    return <Login onLoginSuccess={handleLoginSuccess} />
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <MainLayout
+      user={user}
+      activePage={activePage}
+      pageTitle={pageTitles[activePage]}
+      onNavigate={setActivePage}
+      onLogout={handleLogout}
+    >
+      {renderCurrentPage()}
+    </MainLayout>
   )
 }
 

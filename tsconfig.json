@@ -2,10 +2,12 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": false,
+    "ignoreDeprecations": "6.0",
+    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.js"]
+  "include": ["src"]
 }
